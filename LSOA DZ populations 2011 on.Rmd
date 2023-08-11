@@ -1,0 +1,314 @@
+---
+title: "Small area population estimates, England, Wales & Scotland - 2011 on"
+author: "Nick Bailey, UBDC"
+date: "18/01/2022"
+output: 
+  html_document:
+    code-folding: hide
+---
+
+## LSOA & DZ populations (2011 geographies) - 2011 on
+
+Reads data from UK/devolved government spreadsheets containing small area population estimates for Lower Super Output Areas (LSOAs) in England and Wales and Datazones (DZs) in Scotland, and combines them into a single file. Units are the 2011-based LSOA/DZ geographies. Extracts total population and three banded age groups (0-15; 16-64; and 65+). Several of the source .csv files have data for individual years of age, but others are banded into 5-year age groups. Only the .csv file for 2011 LSOAs has banding which does not align with the three age groups selected. In this case, an estimate is made of the number of 15-year olds (assumed as one fifth of the number 15-19) so the same age groups can be constructed. 
+
+Data downloaded (18 Jan 2022) from: 
+
+* https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareamidyearpopulationestimates and 
+* https://www.nrscotland.gov.uk/statistics-and-data/statistics/statistics-by-theme/population/population-estimates/small-area-population-estimates-2011-data-zone-based/time-series
+
+Resulting .csv file contains estimated mid-year population (popln; popln_0_15; popln_16_64; popln_65_up) for 41,729 LSOAs/DZs (lsoa_code) for England, Wales and Scotland for each year (year) from 2011 onwards. 
+
+```{r setup}
+# knitr::opts_chunk$set(echo = FALSE)
+
+# load packages
+pacman::p_load(feather, here, tidyverse, readxl)
+
+```
+
+
+## England & Wales
+
+34,753 LSOAs in England & Wales. 
+
+```{r data ew}
+
+## 2020 - with age bands
+df_pop_ew_20 <- read_excel(here("sape_ew",
+                                  "sape23dt2mid2020lsoasyoaestimatesunformatted.xlsx"),
+                             sheet = "Mid-2020 Persons",
+                             skip = 4) %>%
+  mutate(popln_0_15 = rowSums(select(., `0`:`15`)),
+         popln_16_64 = rowSums(select(., `16`:`64`)),
+         popln_65_up = rowSums(select(., `65`:`90+`))) %>%
+  select(lsoa_code = `LSOA Code`,
+         popln = `All Ages`,
+         popln_0_15,
+         popln_16_64,
+         popln_65_up) %>%
+  filter(grepl("E01", lsoa_code)|
+           grepl("W01", lsoa_code)) %>% # remove rows with national total, etc.
+  mutate(year = 2020)
+
+## 2019 updated May 2023
+df_pop_ew_19 <- read_excel(here("sape_ew", 
+                                "SAPE22DT2-mid-2019-lsoa-syoa-estimates-unformatted.xlsx"),
+                             sheet = "Mid-2019 Persons", 
+                             skip = 4) %>% 
+  mutate(popln_0_15 = rowSums(select(., `0`:`15`)),
+         popln_16_64 = rowSums(select(., `16`:`64`)),
+         popln_65_up = rowSums(select(., `65`:`90+`))) %>%
+  select(lsoa_code = `LSOA Code`,
+         popln = `All Ages`,
+         popln_0_15,
+         popln_16_64,
+         popln_65_up) %>%
+  filter(grepl("E01", lsoa_code)|
+           grepl("W01", lsoa_code)) %>% 
+  mutate(year = 2019)
+
+## 2018
+df_pop_ew_18 <- read_excel(here("sape_ew", 
+                                "SAPE21DT1a-mid-2018-on-2019-LA-lsoa-syoa-estimates-formatted.xlsx"),
+                             sheet = "Mid-2018 Persons", 
+                             skip = 4) %>% 
+  mutate(popln_0_15 = rowSums(select(., `0`:`15`)),
+         popln_16_64 = rowSums(select(., `16`:`64`)),
+         popln_65_up = rowSums(select(., `65`:`90+`))) %>%
+  select(lsoa_code = `Area Codes`,
+         popln = `All Ages`,
+         popln_0_15,
+         popln_16_64,
+         popln_65_up) %>%
+  filter(grepl("E01", lsoa_code)|
+           grepl("W01", lsoa_code)) %>% 
+  mutate(year = 2018)
+
+## 2017
+df_pop_ew_17 <- read_excel(here("sape_ew", 
+                                  "SAPE20DT1-mid-2017-lsoa-syoa-estimates-formatted.xls"),
+                             sheet = "Mid-2017 Persons", 
+                             skip = 4) %>% 
+  mutate(popln_0_15 = rowSums(select(., `0`:`15`)),
+         popln_16_64 = rowSums(select(., `16`:`64`)),
+         popln_65_up = rowSums(select(., `65`:`90+`))) %>%
+  select(lsoa_code = `Area Codes`,
+         popln = `All Ages`,
+         popln_0_15,
+         popln_16_64,
+         popln_65_up) %>%
+  filter(grepl("E01", lsoa_code)|
+           grepl("W01", lsoa_code)) %>% 
+  mutate(year = 2017)
+
+## 2016
+df_pop_ew_16 <- read_excel(here("sape_ew", 
+                                  "SAPE20DT1-mid-2016-lsoa-syoa-estimates-formatted.xls"),
+                             sheet = "Mid-2016 Persons", 
+                             skip = 4) %>% 
+  mutate(popln_0_15 = rowSums(select(., `0`:`15`)),
+         popln_16_64 = rowSums(select(., `16`:`64`)),
+         popln_65_up = rowSums(select(., `65`:`90+`))) %>%
+  select(lsoa_code = `Area Codes`,
+         popln = `All Ages`,
+         popln_0_15,
+         popln_16_64,
+         popln_65_up) %>%
+  filter(grepl("E01", lsoa_code)|
+           grepl("W01", lsoa_code)) %>% 
+  mutate(year = 2016)
+
+## 2015
+df_pop_ew_15 <- read_excel(here("sape_ew", 
+                                  "SAPE20DT1-mid-2015-lsoa-syoa-estimates-formatted.xls"),
+                             sheet = "Mid-2015 Persons", 
+                             skip = 4) %>% 
+  mutate(popln_0_15 = rowSums(select(., `0`:`15`)),
+         popln_16_64 = rowSums(select(., `16`:`64`)),
+         popln_65_up = rowSums(select(., `65`:`90+`))) %>%
+  select(lsoa_code = `Area Codes`,
+         popln = `All Ages`,
+         popln_0_15,
+         popln_16_64,
+         popln_65_up) %>%
+  filter(grepl("E01", lsoa_code)|
+           grepl("W01", lsoa_code)) %>% 
+  mutate(year = 2015)
+
+## 2014
+df_pop_ew_14 <- read_excel(here("sape_ew", 
+                                  "SAPE20DT1-mid-2014-lsoa-syoa-estimates-formatted.xls"),
+                             sheet = "Mid-2014 Persons", 
+                             skip = 4) %>% 
+  mutate(popln_0_15 = rowSums(select(., `0`:`15`)),
+         popln_16_64 = rowSums(select(., `16`:`64`)),
+         popln_65_up = rowSums(select(., `65`:`90+`))) %>%
+  select(lsoa_code = `Area Codes`,
+         popln = `All Ages`,
+         popln_0_15,
+         popln_16_64,
+         popln_65_up) %>%
+  filter(grepl("E01", lsoa_code)|
+           grepl("W01", lsoa_code)) %>% 
+  mutate(year = 2014)
+
+## 2013
+df_pop_ew_13 <- read_excel(here("sape_ew", 
+                                  "SAPE20DT1-mid-2013-lsoa-syoa-estimates-formatted.xls"),
+                             sheet = "Mid-2013 Persons", 
+                             skip = 4) %>% 
+  mutate(popln_0_15 = rowSums(select(., `0`:`15`)),
+         popln_16_64 = rowSums(select(., `16`:`64`)),
+         popln_65_up = rowSums(select(., `65`:`90+`))) %>%
+  select(lsoa_code = `Area Codes`,
+         popln = `All Ages`,
+         popln_0_15,
+         popln_16_64,
+         popln_65_up) %>%
+  filter(grepl("E01", lsoa_code)|
+           grepl("W01", lsoa_code)) %>% 
+  mutate(year = 2013)
+
+## 2012
+df_pop_ew_12 <- read_excel(here("sape_ew", 
+                                  "SAPE20DT1-mid-2012-lsoa-syoa-estimates-formatted.xls"),
+                             sheet = "Mid-2012 Persons", 
+                             skip = 4) %>% 
+  mutate(popln_0_15 = rowSums(select(., `0`:`15`)),
+         popln_16_64 = rowSums(select(., `16`:`64`)),
+         popln_65_up = rowSums(select(., `65`:`90+`))) %>%
+  select(lsoa_code = `Area Codes`,
+         popln = `All Ages`,
+         popln_0_15,
+         popln_16_64,
+         popln_65_up) %>%
+  filter(grepl("E01", lsoa_code)|
+           grepl("W01", lsoa_code)) %>% 
+  mutate(year = 2012)
+
+## 2011
+#  NB estimates made for 0-15 and 16-64 due to banding in source data
+df_pop_ew_11 <- read_excel(here("sape_ew", 
+                                  "mid-2011-lsoa-quinary-estimates.xls"),
+                             sheet = "Mid-2011 Persons", 
+                             skip = 3) %>%   # note diff to later years
+  mutate(popln_0_15 = rowSums(select(., `0-4`:`10-14`)) + (`15-19`/5),
+         popln_16_64 = rowSums(select(., `15-19`:`60-64`)) - (`15-19`/5),
+         popln_65_up = rowSums(select(., `65-69`:`90+`))) %>%
+  select(lsoa_code = `Area Codes`,
+         popln = `All Ages`,
+         popln_0_15,
+         popln_16_64,
+         popln_65_up) %>%
+  filter(grepl("E01", lsoa_code)|
+           grepl("W01", lsoa_code)) %>% 
+  mutate(year = 2011)
+
+# combine
+df_pop_ew <- df_pop_ew_20 %>% 
+  rbind(df_pop_ew_19) %>% 
+  rbind(df_pop_ew_18) %>% 
+  rbind(df_pop_ew_17) %>% 
+  rbind(df_pop_ew_16) %>% 
+  rbind(df_pop_ew_15) %>% 
+  rbind(df_pop_ew_14) %>% 
+  rbind(df_pop_ew_13) %>% 
+  rbind(df_pop_ew_12) %>% 
+  rbind(df_pop_ew_11)
+
+```
+
+
+## Scotland
+6976 DZs in Scotland. Note that the Scottish data go back to 2001 on the same set of (2011-based) DZ boundaries. 
+May 2023: a new, consistently formatted set of .xlsx files with single year of age now available making automating possible. 
+
+
+```{r data sc}
+
+# make list of years for file names
+ls_files_sc <- unlist(seq(2001, 2021, 1))
+
+# read .xlsx files and reformat
+df_pop_sc <- ls_files_sc %>%
+  map_dfr(~ read_excel(here("sape_sc", paste0("sape-", .x, ".xlsx")),
+                       sheet = "Persons",
+                       skip = 3) %>% mutate(year = .x)) %>% 
+  mutate(popln_0_15 = rowSums(select(., `Age 0`:`Age 15`)),
+         popln_16_64 = rowSums(select(., `Age 16`:`Age 64`)),
+         popln_65_up = rowSums(select(., `Age 65`:`Age 90 and over`))) %>%
+  select(lsoa_code = `Data zone code`,
+         popln = `Total population`,
+         popln_0_15,
+         popln_16_64,
+         popln_65_up, 
+         year) %>%
+  filter(grepl("S01", lsoa_code))
+
+```
+
+
+
+
+## Combine files
+
+Combine files and tidy. 
+
+```{r data all}
+
+# combine ew and sc
+df_pop <- df_pop_ew %>% 
+  rbind(df_pop_sc) 
+
+```
+
+
+Check that, for each LSOA, total population is the sum of the different age bands. Result should be zero. 
+
+```{r check 1}
+
+df_pop %>% 
+  mutate(check = popln - rowSums(select(., popln_0_15:popln_65_up))) %>% 
+  summarise(check_sum = sum(check**2)) # use square so negatives can't cancel positives
+
+```
+
+```{r data all tidy}
+
+# combine ew and sc
+df_pop <- df_pop %>% 
+  pivot_longer(contains("popln"), names_to = "popln", values_to = "count")
+
+```
+
+Check the number of LSOAs is the same each year. Result should be 41,729 from 2011 onwards; earlier years just Scotland (and current version, 2021 also).
+
+```{r check 2}
+
+df_pop %>% 
+  filter(popln == "popln") %>% 
+  group_by(year) %>% 
+  summarise(n_lsoa = n())
+
+```
+
+## Save result
+
+```{r save}
+
+# write 2011 years on for GB
+write_csv(df_pop[df_pop$year >= 2011, ], 
+          here("data", "lsoa_dz_popln_2011_on.csv"))
+
+# write 2011 years on for GB
+write_feather(df_pop[df_pop$year >= 2011, ], 
+              here("data", "lsoa_dz_popln_2011_on.feather"))
+
+# Scotland only - all years
+temp <- df_pop %>% 
+  filter(grepl("S01", lsoa_code)) 
+
+write_csv(temp, here("data", "dz_popln_2001_on.csv"))
+
+```
+
